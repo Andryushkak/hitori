@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>markus</title>
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <link rel="icon" type="image/png" sizes="16x16" href="/image/favicon-16x16.png">
+
+</head>
+<body>
+  <div class="img"></div>
+
+  <a href="#" type="button" class="google-login"></a>
+
+  <div class="container">
+    <div class="box">
+        <h2>Реєстрація</h2>
+        <form id="registrationForm" action="/api/register" method="POST">
+            <div>
+                <input type="text" name="first_name" required>
+                <span>Ім'я</span>
+                <i></i>
+            </div>
+            
+            <div>
+                <input type="text" name="last_name" required>
+                <span>Прізвище</span>
+                <i></i>
+            </div>
+
+            <div>
+                <input type="email" name="email" required>
+                <span>Поштова скринька</span>
+                <i></i>
+            </div>
+
+            <div>
+                <input type="password" name="password" required>
+                <span>Пароль</span>
+                <i></i>
+            </div>
+
+            <input type="submit" class="register" value="Надіслати" name="registerButton">
+        </form>
+    
+
+        <div class="box-form">
+            <h2>Увійти</h2>
+            <form id="loginForm" action="/api/login" method="POST">
+                <div>
+                    <input type="email" name="email" required>
+                    <span>Поштова скринька</span>
+                    <i></i>
+                </div>
+
+                <div>
+                    <input type="password" name="password" required>
+                    <span>Пароль</span>
+                    <i></i>
+                </div>
+
+                <input type="submit" value="Надіслати" name="loginButton">
+
+                <a href="№" type="button" class="Face-auntefication"></a>
+            </form>
+            <div class="close"></div>
+        </div>
+    </div>
+</div>
+<script src="/js/form.js"></script>
+</body>
+</html>
