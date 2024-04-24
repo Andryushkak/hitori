@@ -3,16 +3,35 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const database = require('./DataBase');
 const cors = require('cors');
+const passport = require('passport');
+const session = require('express-session');
 
+require('./passport-setup');
+const authRoutes = require('./auth-routes');
 const app = express();
+
+app.use(session({
+  secret: '3d5879beae87657b4c944f7ee4da4886adc8cd5cb0c73b5675ce66d2773b3396',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }
+}));
+
 app.use(cors({
-origin: ['https://markus-it.azurewebsites.net', 'http://localhost:3000'],
+  origin: ['https://markus-it.azurewebsites.net', 'http://localhost:3000'],
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type','Application/json'],
 }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Ініціалізація Passport та налаштування для сесій
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Підключення маршрутів для автентифікації через Google
+app.use('/', authRoutes);
 
 // Route handler for registration request
 app.post("/register", async (req, res, next) => {
@@ -35,9 +54,6 @@ app.post("/login", async (req, res, next) => {
     res.status(401).send('Неправильний email або пароль');
   }
 });
-
-// Parsing POST request data
-
 
 // Middleware for serving static files
 app.use(express.static(path.join(__dirname, ''), {
@@ -63,8 +79,6 @@ app.get('/', function(req, res) {
     }
   });
 });
-
-
 
 // Set the port for the server
 const PORT = process.env.PORT || 3000;
