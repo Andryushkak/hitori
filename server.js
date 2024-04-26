@@ -34,22 +34,6 @@ app.use(passport.session());
 app.use('/', authRoutes);
 
 // Встановіть доступ до Azure Key Vault
-async function getKeyVaultSecrets() {
-    const credential = new DefaultAzureCredential();
-    const keyVaultName = process.env["KEY_VAULT_NAME"];
-    const url = "https://" + keyVaultName + ".vault.azure.net";
-    const kvClient = new SecretClient(url, credential);
-
-    // Встановіть імена секретів, що використовуються в вашому Key Vault
-    const keySecretName = "key1";
-    const endpointSecretName = "key2";
-
-    // Отримайте значення секретів з Key Vault
-    const retrievedKey = await (await kvClient.getSecret(keySecretName)).value;
-    const retrievedEndpoint = await (await kvClient.getSecret(endpointSecretName)).value;
-
-    return { key: retrievedKey, endpoint: retrievedEndpoint };
-}
 
 // Route handler for registration request
 app.post("/register", async (req, res, next) => {
@@ -101,8 +85,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   console.log(`Сервер запущено на порті ${PORT}`);
   
-  // Отримайте значення секретів з Azure Key Vault після запуску сервера
-  const { key, endpoint } = await getKeyVaultSecrets();
-  console.log("Your secret key value is: ", key);
-  console.log("Your secret endpoint value is: ", endpoint);
 });
