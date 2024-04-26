@@ -5,8 +5,8 @@ const database = require('./DataBase');
 passport.use(new GoogleStrategy({
     clientID: '617652204018-6sc96caa446ufmudadd2b6eb6ql6vkip.apps.googleusercontent.com',
     clientSecret: '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',
-    callbackURL: "https://markus-it.azurewebsites.net/auth/google/callback"
-    
+    callbackURL: "http://127.0.0.1:3000/auth/google/callback"
+    // callbackURL: "https://markus-it.azurewebsites.net/auth/google/callback"
   },
   async (accessToken, refreshToken, profile, done) => {
     // Перевіряємо, чи користувач вже існує в базі даних

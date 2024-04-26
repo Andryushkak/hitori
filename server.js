@@ -5,6 +5,8 @@ const database = require('./DataBase');
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
+const { SecretClient } = require("@azure/keyvault-secrets");
+const { DefaultAzureCredential } = require("@azure/identity");
 
 require('./passport-setup');
 const authRoutes = require('./auth-routes');
@@ -26,12 +28,28 @@ app.use(cors({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Ініціалізація Passport та налаштування для сесій
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Підключення маршрутів для автентифікації через Google
 app.use('/', authRoutes);
+
+// Встановіть доступ до Azure Key Vault
+async function getKeyVaultSecrets() {
+    const credential = new DefaultAzureCredential();
+    const keyVaultName = process.env["KEY_VAULT_NAME"];
+    const url = "https://" + keyVaultName + ".vault.azure.net";
+    const kvClient = new SecretClient(url, credential);
+
+    // Встановіть імена секретів, що використовуються в вашому Key Vault
+    const keySecretName = "key1";
+    const endpointSecretName = "key2";
+
+    // Отримайте значення секретів з Key Vault
+    const retrievedKey = await (await kvClient.getSecret(keySecretName)).value;
+    const retrievedEndpoint = await (await kvClient.getSecret(endpointSecretName)).value;
+
+    return { key: retrievedKey, endpoint: retrievedEndpoint };
+}
 
 // Route handler for registration request
 app.post("/register", async (req, res, next) => {
@@ -55,7 +73,6 @@ app.post("/login", async (req, res, next) => {
   }
 });
 
-// Middleware for serving static files
 app.use(express.static(path.join(__dirname, ''), {
   setHeaders: (res, path, stat) => {
     if (path.endsWith('.css')) {
@@ -67,7 +84,6 @@ app.use(express.static(path.join(__dirname, ''), {
   fallthrough: false
 }));
 
-// Route handler for the main page
 app.get('/', function(req, res) {
   const op = {
     root: path.join(__dirname, '') 
@@ -80,10 +96,13 @@ app.get('/', function(req, res) {
   });
 });
 
-// Set the port for the server
 const PORT = process.env.PORT || 3000;
 
-// Start the server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Сервер запущено на порті ${PORT}`);
+  
+  // Отримайте значення секретів з Azure Key Vault після запуску сервера
+  const { key, endpoint } = await getKeyVaultSecrets();
+  console.log("Your secret key value is: ", key);
+  console.log("Your secret endpoint value is: ", endpoint);
 });
