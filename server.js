@@ -5,6 +5,8 @@ const database = require('./DataBase');
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
+const { SecretClient } = require("@azure/keyvault-secrets");
+const { DefaultAzureCredential } = require("@azure/identity");
 
 require('./passport-setup');
 const authRoutes = require('./auth-routes');
