@@ -28,12 +28,12 @@ app.use(cors({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Ініціалізація Passport та налаштування для сесій
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Підключення маршрутів для автентифікації через Google
 app.use('/', authRoutes);
+
+// Встановіть доступ до Azure Key Vault
 
 // Route handler for registration request
 app.post("/register", async (req, res, next) => {
@@ -57,7 +57,6 @@ app.post("/login", async (req, res, next) => {
   }
 });
 
-// Middleware for serving static files
 app.use(express.static(path.join(__dirname, ''), {
   setHeaders: (res, path, stat) => {
     if (path.endsWith('.css')) {
@@ -69,7 +68,6 @@ app.use(express.static(path.join(__dirname, ''), {
   fallthrough: false
 }));
 
-// Route handler for the main page
 app.get('/', function(req, res) {
   const op = {
     root: path.join(__dirname, '') 
@@ -82,10 +80,9 @@ app.get('/', function(req, res) {
   });
 });
 
-// Set the port for the server
 const PORT = process.env.PORT || 3000;
 
-// Start the server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Сервер запущено на порті ${PORT}`);
+  
 });
