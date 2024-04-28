@@ -42,6 +42,15 @@
             </div>
 
             <input type="submit" class="register" value="Надіслати" name="registerButton">
+
+
+            <button class="take-photo-button">Зробити фото</button>
+            <div id="popup-container" style="display: none;">
+                <video id="video" width="400" height="300" autoplay></video>
+                <button id="snap">Snap Photo</button>
+                <canvas id="canvas" width="400" height="300"></canvas>
+             </div>
+            
         </form>
     
 
@@ -68,6 +77,7 @@
         </div>
     </div>
 </div>
+<script src="/js/camera.js"></script>
 <script src="/js/form.js"></script>
 </body>
 </html>

@@ -5,6 +5,7 @@ const database = require('./DataBase');
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
+const uploadPhotoToAzureStorage = require('./azureStorage'); // Включення файла з функцією для завантаження на Azure Storage
 const { SecretClient } = require("@azure/keyvault-secrets");
 const { DefaultAzureCredential } = require("@azure/identity");
 
@@ -33,7 +34,16 @@ app.use(passport.session());
 
 app.use('/', authRoutes);
 
-// Встановіть доступ до Azure Key Vault
+app.post("/upload-photo", async (req, res, next) => {
+  const { photoData, photoName } = req.body; // Припускаючи, що дані фото передаються в запиті
+  try {
+    // Викликати функцію для завантаження фото на Azure Blob Storage
+    await uploadPhotoToAzureStorage(photoData, photoName);
+    res.status(200).send('Фото успішно завантажено на Azure Blob Storage');
+  } catch (error) {
+    res.status(500).send('Помилка при завантаженні фото на Azure Blob Storage');
+  }
+});
 
 // Route handler for registration request
 app.post("/register", async (req, res, next) => {

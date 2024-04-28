@@ -1,0 +1,59 @@
+<!-- popup.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Camera Popup</title>
+</head>
+<body>
+  <video id="video" width="400" height="300" autoplay></video>
+  <button id="snap">Snap Photo</button>
+  <canvas id="canvas" width="400" height="300"></canvas>
+  <script>
+    var video = document.getElementById('video');
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    var snap = document.getElementById('snap');
+
+    var urlParams = new URLSearchParams(window.location.search);
+    var firstName = urlParams.get('firstName');
+    var lastName = urlParams.get('lastName');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function(stream) {
+        video.srcObject = stream;
+        video.play();
+      })
+      .catch(function(err) {
+        console.log("An error occurred: " + err);
+      });
+
+    snap.addEventListener('click', function() {
+      context.drawImage(video, 0, 0, 400, 300);
+      var photoName = `${firstName}_${lastName}.jpg`; // Генеруємо назву файлу
+      var photoData = canvas.toDataURL('image/jpeg'); // Отримуємо фото у форматі base64
+
+      // Відправка фото на сервер
+      fetch('/upload-photo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ photoData: photoData, photoName: photoName })
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log('Фото успішно відправлено на сервер');
+          return response.text();
+        }
+        throw new Error('Помилка при відправленні фото на сервер');
+      })
+      .then(data => {
+        console.log(data); // Вивід успішного повідомлення
+      })
+      .catch(error => {
+        console.error(error); // Вивід помилки
+      });
+    });
+  </script>
+</body>
+</html>
