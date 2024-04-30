@@ -5,9 +5,8 @@ const database = require('./DataBase');
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
-const uploadPhotoToAzureStorage = require('./azureStorage'); // Включення файла з функцією для завантаження на Azure Storage
-const { SecretClient } = require("@azure/keyvault-secrets");
-const { DefaultAzureCredential } = require("@azure/identity");
+const uploadPhotoToAzureStorage = require('./azureStorage');
+const multer = require('multer');
 
 require('./passport-setup');
 const authRoutes = require('./auth-routes');
@@ -21,9 +20,9 @@ app.use(session({
 }));
 
 app.use(cors({
-  origin: ['https://markus-it.azurewebsites.net', 'http://localhost:3000'],
+  origin: ['https://markus-it.azurewebsites.net', 'http://127.0.0.1:3000'],
   methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type','Application/json'],
+  allowedHeaders: ['Content-Type', 'Application/json'],
 }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -34,18 +33,34 @@ app.use(passport.session());
 
 app.use('/', authRoutes);
 
-app.post("/upload-photo", async (req, res, next) => {
-  const { photoData, photoName } = req.body; // Припускаючи, що дані фото передаються в запиті
+const upload = multer();
+app.post("/upload-photo", upload.single('photoData'), async (req, res, next) => {
   try {
-    // Викликати функцію для завантаження фото на Azure Blob Storage
+    console.log(req.file); // Перевірте, чи правильно отримано файл
+    if (!req.file) {
+      return res.status(400).send('Немає завантаженого файлу');
+    }
+
+    // Отримуємо значення поля "photoData" з об'єкта FormData
+    const photoData = req.file.buffer.toString('base64');
+    console.log(photoData); // Перевірте значення photoData
+    // Виводимо отриманий рядок фото
+    console.log(photoData);
+
+    // Перевіряємо тип отриманого значення
+    console.log(typeof photoData);
+
+    // Продовжуємо обробку запиту, включаючи використання фотоданих для завантаження
+    const photoName = req.file.originalname;
     await uploadPhotoToAzureStorage(photoData, photoName);
     res.status(200).send('Фото успішно завантажено на Azure Blob Storage');
   } catch (error) {
-    res.status(500).send('Помилка при завантаженні фото на Azure Blob Storage');
+    console.error("Помилка при завантаженні фото на сервер:", error);
+    res.status(500).send('Помилка при завантаженні фото на сервер: ' + error.message);
   }
 });
 
-// Route handler for registration request
+
 app.post("/register", async (req, res, next) => {
   const { first_name, last_name, email, password } = req.body;
   const result = await database.registerUser(first_name, last_name, email, password);
@@ -56,7 +71,6 @@ app.post("/register", async (req, res, next) => {
   }
 });
 
-// Route handler for login request
 app.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
   const user = await database.loginUser(email, password);
@@ -80,7 +94,7 @@ app.use(express.static(path.join(__dirname, ''), {
 
 app.get('/', function(req, res) {
   const op = {
-    root: path.join(__dirname, '') 
+    root: path.join(__dirname, '')
   };
   const file = "/index.html";
   res.sendFile(file, op, function(err) {
@@ -94,5 +108,4 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, async () => {
   console.log(`Сервер запущено на порті ${PORT}`);
-  
 });
