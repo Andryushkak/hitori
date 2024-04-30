@@ -51,7 +51,8 @@ app.post("/upload-photo", upload.single('photoData'), async (req, res, next) => 
     console.log(typeof photoData);
 
     // Продовжуємо обробку запиту, включаючи використання фотоданих для завантаження
-    const photoName = req.file.originalname;
+    const { first_name, last_name } = req.body; // Отримання імені та прізвища з форми
+    const photoName = `${first_name}_${last_name}`; // Створення імені фото
     await uploadPhotoToAzureStorage(photoData, photoName);
     res.status(200).send('Фото успішно завантажено на Azure Blob Storage');
   } catch (error) {

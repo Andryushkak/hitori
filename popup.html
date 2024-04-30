@@ -38,7 +38,8 @@
       // Створюємо об'єкт FormData
       var formData = new FormData();
       formData.append('photoData', blobData);
-      formData.append('photoName', `${firstName}_${lastName}.jpg`);
+      formData.append('first_name', firstName); // Додаємо ім'я в formData
+      formData.append('last_name', lastName); // Додаємо прізвище в formData
 
       // Відправка фото на сервер
       fetch('/upload-photo', {

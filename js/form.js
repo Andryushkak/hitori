@@ -10,6 +10,7 @@ window.onload = () => {
     const registrationForm = document.getElementById("registrationForm");
     const loginForm = document.getElementById("loginForm");
 
+
     registrationForm.addEventListener("submit", function (e) {
         e.preventDefault();
         sendData(this, "/register");
