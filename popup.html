@@ -2,11 +2,15 @@
 <html>
 <head>
   <title>Camera Popup</title>
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lugrasimo&display=swap" rel="stylesheet">
 </head>
 <body>
   <video id="video" width="400" height="300" autoplay></video>
-  <button id="snap">Snap Photo</button>
-  <canvas id="canvas" width="400" height="300" style="display: none;"></canvas>
+  <button  class="Snap_Photo" id="snap">Snap Photo</button>
+  <canvas id="canvas" width="550" height="550" style="display: none;"></canvas>
   <script>
     var video = document.getElementById('video');
     var canvas = document.getElementById('canvas');

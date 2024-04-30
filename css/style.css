@@ -4,6 +4,7 @@
     border: none;
     outline: none;
     box-sizing: border-box;
+    font-family: "Lugrasimo", cursive;
 }
 .img {
     background: url(/image/zori.jpg) no-repeat center / cover;
@@ -332,3 +333,5 @@ canvas {
 
     cursor: pointer;
 }
+
+  
