@@ -7,6 +7,8 @@ const passport = require('passport');
 const session = require('express-session');
 const uploadPhotoToAzureStorage = require('./azureStorage');
 const multer = require('multer');
+// const faceRecognition = require('./faceRecognition');
+
 
 require('./passport-setup');
 const authRoutes = require('./auth-routes');
@@ -32,6 +34,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', authRoutes);
+
+// module.exports = faceRecognition;
 
 const upload = multer();
 app.post("/upload-photo", upload.single('photoData'), async (req, res, next) => {

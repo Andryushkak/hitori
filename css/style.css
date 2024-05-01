@@ -101,7 +101,7 @@ section {
     text-align: center;
     letter-spacing: 4px;
     position: absolute;
-    top: 70px;
+    top: 50px;
 }
 .box form {
     width: 300px;
@@ -170,6 +170,7 @@ section {
     border-radius: 4px;
     cursor: pointer;
     transition: 0.5s;
+    font-family: "Lugrasimo";
 }
 
 .box form input[type="submit"]:hover {

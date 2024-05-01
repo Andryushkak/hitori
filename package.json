@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/cognitiveservices-face": "^5.0.0",
     "@azure/identity": "^4.1.0",
     "@azure/keyvault-secrets": "^4.8.0",
+    "@azure/ms-rest-js": "^2.7.0",
     "@azure/storage-blob": "^12.17.0",
     "axios": "^1.6.8",
     "cookie-session": "^2.1.0",
