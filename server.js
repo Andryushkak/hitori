@@ -7,8 +7,6 @@ const passport = require('passport');
 const session = require('express-session');
 const uploadPhotoToAzureStorage = require('./azureStorage');
 const multer = require('multer');
-// const faceRecognition = require('./faceRecognition');
-
 
 require('./passport-setup');
 const authRoutes = require('./auth-routes');
@@ -35,28 +33,20 @@ app.use(passport.session());
 
 app.use('/', authRoutes);
 
-// module.exports = faceRecognition;
-
 const upload = multer();
 app.post("/upload-photo", upload.single('photoData'), async (req, res, next) => {
   try {
-    console.log(req.file); // Перевірте, чи правильно отримано файл
+    console.log(req.file); 
     if (!req.file) {
       return res.status(400).send('Немає завантаженого файлу');
     }
 
-    // Отримуємо значення поля "photoData" з об'єкта FormData
     const photoData = req.file.buffer.toString('base64');
-    console.log(photoData); // Перевірте значення photoData
-    // Виводимо отриманий рядок фото
-    console.log(photoData);
-
-    // Перевіряємо тип отриманого значення
+    console.log(photoData); 
     console.log(typeof photoData);
 
-    // Продовжуємо обробку запиту, включаючи використання фотоданих для завантаження
-    const { first_name, last_name } = req.body; // Отримання імені та прізвища з форми
-    const photoName = `${first_name}_${last_name}`; // Створення імені фото
+    const { first_name, last_name } = req.body; 
+    const photoName = `${first_name}_${last_name}`; 
     await uploadPhotoToAzureStorage(photoData, photoName);
     res.status(200).send('Фото успішно завантажено на Azure Blob Storage');
   } catch (error) {
@@ -65,12 +55,18 @@ app.post("/upload-photo", upload.single('photoData'), async (req, res, next) => 
   }
 });
 
+// Встановлення шляху для відображення шаблонів EJS
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 app.post("/register", async (req, res, next) => {
   const { first_name, last_name, email, password } = req.body;
   const result = await database.registerUser(first_name, last_name, email, password);
   if (result) {
-    res.redirect('/hello.html');
+    // Отримання даних користувача
+    const user = { first_name, last_name, email };
+    // Перенаправлення на сторінку профілю
+    res.render('profile', { user }); // Відображення шаблону "profile.ejs" з даними користувача
   } else {
     res.status(500).send('Помилка реєстрації користувача');
   }

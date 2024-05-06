@@ -25,23 +25,22 @@ window.onload = () => {
         const formData = new FormData(form);
         const xhr = new XMLHttpRequest();
         xhr.open("POST", endpoint);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // Змініть Content-Type на application/x-www-form-urlencoded
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
         xhr.onload = function () {
             if (xhr.status === 200) {
                 console.log("Request successful");
-                window.location.href = "/hello.html";
+                window.location.href = "/profile"; // Перенаправлення на сторінку профілю
             } else {
                 console.error("Request failed");
                 console.log(xhr);
                 console.log(xhr.responseText);
                 console.log(formData);
-                alert("Помилка сервера"); // Повідомлення про помилку сервера
+                alert("Помилка сервера");
             }
         };
         
 
-        // Перетворення об'єкта formData на рядок URL-параметрів
         const urlEncodedData = new URLSearchParams(formData).toString();
         xhr.send(urlEncodedData);
     }

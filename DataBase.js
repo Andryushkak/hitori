@@ -25,23 +25,30 @@ async function pool() {
 
 async function registerUser(first_name, last_name, email, password) {
   try {
+    const existingUser = await findUserByEmail(email); // Перевіряємо, чи вже є користувач з такою поштою
+    if (existingUser) {
+      console.log('Користувач з такою поштою вже існує');
+      return false; // Повертаємо false, якщо користувач вже існує
+    }
+
     const dbPool = await pool();
     const request = dbPool.request();
-    request.input("first_name", sql.NVarChar(50), first_name); // Виправлено назву функції
-    request.input("last_name", sql.NVarChar(50), last_name); // Виправлено назву функції
-    request.input("email", sql.NVarChar(200), email); // Виправлено назву функції
-    request.input("password", sql.NVarChar(500), password); // Виправлено назву функції
+    request.input("first_name", sql.NVarChar(50), first_name);
+    request.input("last_name", sql.NVarChar(50), last_name);
+    request.input("email", sql.NVarChar(200), email);
+    request.input("password", sql.NVarChar(500), password);
     const result = await request.query(`
-      INSERT INTO [user] (first_name, last_name, email, password)  -- "user" є зарезервованим ключовим словом в SQL, тому ми використовуємо його у квадратних дужках
+      INSERT INTO [user] (first_name, last_name, email, password)
       VALUES (@first_name, @last_name, @email, @password);
     `);
-    console.log('User registered successfully');
-    return result.rowsAffected;
+    console.log('Користувач успішно зареєстрований');
+    return true; // Повертаємо true, якщо користувача успішно зареєстровано
   } catch (error) {
-    console.error('Error registering user:', error);
+    console.error('Помилка реєстрації користувача:', error);
     throw error;
   }
 }
+
 
 async function loginUser(email, password) {
   try {
@@ -92,6 +99,10 @@ async function findUserById(id) {
     const result = await request.query(`
       SELECT * FROM [user] WHERE id = @id;
     `);
+
+    // Додано виведення значення id перед його використанням
+    console.log('ID, переданий у запиті SQL:', id);
+
     if (result.recordset.length === 0) {
       console.log('User not found');
       return null;
@@ -103,6 +114,7 @@ async function findUserById(id) {
     throw error;
   }
 }
+
 async function findUserByEmail(email) {
   try {
     const dbPool = await pool();
