@@ -11,7 +11,7 @@ router.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
     // Успішна автентифікація, перенаправлення на головну сторінку
-    res.render('profile', { user: { first_name, last_name, email } });
+    res.render('/profile');
   }
 );
 

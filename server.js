@@ -12,6 +12,9 @@ require('./passport-setup');
 const authRoutes = require('./auth-routes');
 const app = express();
 
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
 app.use(session({
   secret: '3d5879beae87657b4c944f7ee4da4886adc8cd5cb0c73b5675ce66d2773b3396',
   resave: false,
@@ -30,6 +33,16 @@ app.use(bodyParser.json());
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+  done(null, user.id); // Зберігаємо лише ідентифікатор користувача у сесії
+});
+
+passport.deserializeUser(async (id, done) => {
+  const user = await database.findUserById(id);
+  done(null, user); // Повертаємо об'єкт користувача для використання в запитах
+});
+
 
 app.use('/', authRoutes);
 
@@ -55,18 +68,13 @@ app.post("/upload-photo", upload.single('photoData'), async (req, res, next) => 
   }
 });
 
-// Встановлення шляху для відображення шаблонів EJS
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
 
 app.post("/register", async (req, res, next) => {
   const { first_name, last_name, email, password } = req.body;
   const result = await database.registerUser(first_name, last_name, email, password);
   if (result) {
-    // Отримання даних користувача
     const user = { first_name, last_name, email };
-    // Перенаправлення на сторінку профілю
-    res.render('profile', { user }); // Відображення шаблону "profile.ejs" з даними користувача
+    res.status(200).redirect('/profile'); // Редірект на сторінку профілю
   } else {
     res.status(500).send('Помилка реєстрації користувача');
   }
@@ -76,11 +84,30 @@ app.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
   const user = await database.loginUser(email, password);
   if (user) {
-    res.status(200).send('Користувач увійшов в систему успішно');
+    const userData = { first_name: user.first_name, last_name: user.last_name, email: user.email };
+    res.status(200).redirect('/profile'); // Редірект на сторінку профілю
   } else {
     res.status(401).send('Неправильний email або пароль');
   }
 });
+
+
+// Маршрут для відображення профілю користувача
+app.get('/profile', async function(req, res) {
+  try {
+    const user = req.user || {}; // Зчитуємо дані користувача з сесії
+
+    // Вивід користувача для перевірки
+    console.log('User in profile route:', user);
+
+    res.render('profile', { user }); // Передаємо дані користувача до шаблону
+  } catch (error) {
+    console.error('Error rendering profile:', error);
+    res.status(500).send('Помилка відображення профілю користувача');
+  }
+});
+
+
 
 app.use(express.static(path.join(__dirname, ''), {
   setHeaders: (res, path, stat) => {
