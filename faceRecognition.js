@@ -1,5 +1,5 @@
 const axios = require('axios');
-const fs = require('fs');
+const { BlobServiceClient } = require("@azure/storage-blob");
 
 const subscriptionKey = 'YOUR_SUBSCRIPTION_KEY';
 const largePersonGroupId = 'YOUR_LARGE_PERSON_GROUP_ID';
@@ -21,55 +21,52 @@ async function sendPostRequest(url, data) {
   }
 }
 
-// Зчитуємо зображення з файлу
-const imageFilePath = 'path/to/your/image.jpg';
-const imageData = fs.readFileSync(imageFilePath).toString('base64');
-
-// Крок 1: Виклик Detect API
-async function detectFace() {
-  const url = 'https://westus.api.cognitive.microsoft.com/face/v1.0/detect';
-  const data = {
-    url: 'URL_TO_YOUR_IMAGE',
-  };
-  const result = await sendPostRequest(url, data);
-  console.log('Detected face:', result);
+// Функція для завантаження зображення з Azure Blob Storage
+async function downloadImageFromStorage(containerName, blobName) {
+  const blobServiceClient = BlobServiceClient.fromConnectionString('https://facestorag.blob.core.windows.net/face');
+  const containerClient = blobServiceClient.getContainerClient(containerName);
+  const blobClient = containerClient.getBlobClient(blobName);
+  const downloadBlockBlobResponse = await blobClient.download();
+  const downloadedImage = await streamToString(downloadBlockBlobResponse.readableStreamBody);
+  return downloadedImage;
 }
 
-// Крок 2: Створення LargePersonGroup
-async function createLargePersonGroup() {
-  const url = `https://westus.api.cognitive.microsoft.com/face/v1.0/largepersongroups/${largePersonGroupId}`;
-  const data = {
-    name: 'large-person-group-name',
-    userData: 'User-provided data attached to the large person group.',
-    recognitionModel: 'recognition_03',
-  };
-  const result = await sendPostRequest(url, data);
-  console.log('LargePersonGroup created:', result);
+// Функція для зчитування потоку в рядок
+async function streamToString(readableStream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    readableStream.on("data", (data) => {
+      chunks.push(data.toString());
+    });
+    readableStream.on("end", () => {
+      resolve(chunks.join(""));
+    });
+    readableStream.on("error", reject);
+  });
 }
 
-// Крок 3: Створення об'єкта Person
-async function createPerson() {
-  const url = `https://westus.api.cognitive.microsoft.com/face/v1.0/largepersongroups/${largePersonGroupId}/persons`;
-  const data = {
-    name: 'Family1-Dad',
-    userData: 'User-provided data attached to the person.',
-  };
-  const result = await sendPostRequest(url, data);
-  console.log('Person created:', result);
-}
-
-// Крок 4: Додавання обличчя до об'єкта Person
-async function addFaceToPerson() {
+// Функція для обробки зображення та додавання його до об'єкта Person
+async function processImage(blobName, containerName) {
+  const imageUrl = `https://${containerName}.blob.core.windows.net/${blobName}`;
   const url = `https://westus.api.cognitive.microsoft.com/face/v1.0/largepersongroups/${largePersonGroupId}/persons/${personId}/persistedfaces`;
+  const imageData = await downloadImageFromStorage(containerName, blobName);
   const data = {
-    url: 'URL_TO_YOUR_IMAGE',
+    url: `data:image/jpeg;base64,${imageData}`,
   };
   const result = await sendPostRequest(url, data);
   console.log('Face added to person:', result);
 }
 
-// Виклик функцій
-detectFace();
-createLargePersonGroup();
-createPerson();
-addFaceToPerson();
+// Функція для обробки всіх зображень у контейнері
+async function processImagesInContainer(containerName) {
+  const blobServiceClient = BlobServiceClient.fromConnectionString('YOUR_AZURE_STORAGE_CONNECTION_STRING');
+  const containerClient = blobServiceClient.getContainerClient(containerName);
+  let i = 1;
+  for await (const blob of containerClient.listBlobsFlat()) {
+    console.log(`Processing image ${i++}: ${blob.name}`);
+    await processImage(blob.name, containerName);
+  }
+}
+
+// Виклик функції для обробки зображень у контейнері
+processImagesInContainer('face');
