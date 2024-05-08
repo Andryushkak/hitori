@@ -1,15 +1,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const database = require('./DataBase');
+const database = require('./bace/DataBase');
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
 const uploadPhotoToAzureStorage = require('./azureStorage');
 const multer = require('multer');
 
-require('./passport-setup');
-const authRoutes = require('./auth-routes');
+require('./register/passport-setup');
+const authRoutes = require('./register/auth-routes');
 const app = express();
 
 app.set('views', path.join(__dirname, 'views'));
@@ -35,12 +35,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.serializeUser((user, done) => {
-  done(null, user.id); // Зберігаємо лише ідентифікатор користувача у сесії
+  done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
   const user = await database.findUserById(id);
-  done(null, user); // Повертаємо об'єкт користувача для використання в запитах
+  done(null, user);
 });
 
 
@@ -74,7 +74,7 @@ app.post("/register", async (req, res, next) => {
   const result = await database.registerUser(first_name, last_name, email, password);
   if (result) {
     const user = { first_name, last_name, email };
-    res.status(200).redirect('/profile'); // Редірект на сторінку профілю
+    res.status(200).redirect('/profile');
   } else {
     res.status(500).send('Помилка реєстрації користувача');
   }
@@ -85,7 +85,7 @@ app.post("/login", async (req, res, next) => {
   const user = await database.loginUser(email, password);
   if (user) {
     const userData = { first_name: user.first_name, last_name: user.last_name, email: user.email };
-    res.status(200).redirect('/profile'); // Редірект на сторінку профілю
+    res.status(200).redirect('/profile');
   } else {
     res.status(401).send('Неправильний email або пароль');
   }

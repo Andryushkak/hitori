@@ -25,10 +25,10 @@ async function pool() {
 
 async function registerUser(first_name, last_name, email, password) {
   try {
-    const existingUser = await findUserByEmail(email); // Перевіряємо, чи вже є користувач з такою поштою
+    const existingUser = await findUserByEmail(email);
     if (existingUser) {
       console.log('Користувач з такою поштою вже існує');
-      return false; // Повертаємо false, якщо користувач вже існує
+      return false;
     }
 
     const dbPool = await pool();
@@ -42,7 +42,7 @@ async function registerUser(first_name, last_name, email, password) {
       VALUES (@first_name, @last_name, @email, @password);
     `);
     console.log('Користувач успішно зареєстрований');
-    return true; // Повертаємо true, якщо користувача успішно зареєстровано
+    return true;
   } catch (error) {
     console.error('Помилка реєстрації користувача:', error);
     throw error;
@@ -54,8 +54,8 @@ async function loginUser(email, password) {
   try {
     const dbPool = await pool();
     const request = dbPool.request();
-    request.input("email", sql.NVarChar(200), email); // Виправлено назву функції
-    request.input("password", sql.NVarChar(500), password); // Виправлено назву функції
+    request.input("email", sql.NVarChar(200), email);
+    request.input("password", sql.NVarChar(500), password);
     const result = await request.query(`
       SELECT * FROM [user] WHERE email = @email AND password = @password;  -- "user" є зарезервованим ключовим словом в SQL, тому ми використовуємо його у квадратних дужках
     `);
@@ -100,7 +100,7 @@ async function findUserById(id) {
       SELECT * FROM [user] WHERE id = @id;
     `);
 
-    // Додано виведення значення id перед його використанням
+    
     console.log('ID, переданий у запиті SQL:', id);
 
     if (result.recordset.length === 0) {

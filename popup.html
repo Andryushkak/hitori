@@ -30,20 +30,20 @@
       });
 
     snap.addEventListener('click', function() {
-      // Копіюємо вміст відео на canvas
+
       canvas.getContext('2d').drawImage(video, 0, 0, 400, 300);
 
-      // Отримуємо зображення у форматі base64 з canvas
+
       var photoData = canvas.toDataURL('image/jpeg');
 
-      // Перетворюємо base64 на Blob
+      
       var blobData = dataURItoBlob(photoData);
 
-      // Створюємо об'єкт FormData
+      
       var formData = new FormData();
       formData.append('photoData', blobData);
-      formData.append('first_name', firstName); // Додаємо ім'я в formData
-      formData.append('last_name', lastName); // Додаємо прізвище в formData
+      formData.append('first_name', firstName);
+      formData.append('last_name', lastName);
 
       // Відправка фото на сервер
       fetch('/upload-photo', {
@@ -58,15 +58,15 @@
         throw new Error('Помилка при відправленні фото на сервер');
       })
       .then(data => {
-        console.log(data); // Вивід успішного повідомлення
+        console.log(data); 
       })
       .catch(error => {
-        console.error(error); // Вивід помилки
+        console.error(error);
       });
     });
 
     function dataURItoBlob(dataURI) {
-      // Конвертуємо base64 у Blob
+      
       var byteString = atob(dataURI.split(',')[1]);
       var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
       var ab = new ArrayBuffer(byteString.length);

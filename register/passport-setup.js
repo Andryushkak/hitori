@@ -1,21 +1,21 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const database = require('./DataBase');
+const database = require('../bace/DataBase');
 
 passport.use(new GoogleStrategy({
     clientID: '617652204018-6sc96caa446ufmudadd2b6eb6ql6vkip.apps.googleusercontent.com',
     clientSecret: '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',
-    // callbackURL: "http://127.0.0.1:3000/auth/google/callback"
-    callbackURL: "https://markus-it.azurewebsites.net/auth/google/callback"
+    callbackURL: "http://127.0.0.1:3000/auth/google/callback"
+    // callbackURL: "https://markus-it.azurewebsites.net/auth/google/callback"
   },
   async (accessToken, refreshToken, profile, done) => {
-    // Перевіряємо, чи користувач вже існує в базі даних
     const existingUser = await database.findUserByEmail(profile.emails[0].value);
     if (existingUser) {
-      // Якщо користувач існує, просто повертаємо його дані
+
       return done(null, existingUser);
+
     } else {
-      // Якщо користувач не існує, реєструємо його в базі даних
+
       const newUser = await database.registerUser(profile.name.givenName, profile.name.familyName, profile.emails[0].value);
       return done(null, newUser);
     }

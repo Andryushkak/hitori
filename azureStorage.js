@@ -12,11 +12,11 @@ const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.cor
 async function uploadPhotoToAzureStorage(photoData, photoName) {
   try {
     const containerClient = blobServiceClient.getContainerClient(containerName);
-    const blobName = `${photoName}.jpg`; // Оновлення імені блоба
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName); // Отримання об'єкта блоба
-    const base64Data = photoData.replace(/^data:image\/jpeg;base64,/, ''); // Видалення префіксу зображення
-    const byteArray = Buffer.from(base64Data, "base64"); // Створення буфера
-    await blockBlobClient.upload(byteArray, byteArray.length); // Завантаження даних у блоб
+    const blobName = `${photoName}.jpg`; 
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName); 
+    const base64Data = photoData.replace(/^data:image\/jpeg;base64,/, ''); 
+    const byteArray = Buffer.from(base64Data, "base64");
+    await blockBlobClient.upload(byteArray, byteArray.length);
     console.log(`Фото ${photoName} успішно завантажено на Azure Blob Storage.`);
   } catch (error) {
     console.error("Помилка при завантаженні фото на Azure Blob Storage:", error);

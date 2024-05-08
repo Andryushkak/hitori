@@ -68,5 +68,5 @@ async function processImagesInContainer(containerName) {
   }
 }
 
-// Виклик функції для обробки зображень у контейнері
+
 processImagesInContainer('face');
